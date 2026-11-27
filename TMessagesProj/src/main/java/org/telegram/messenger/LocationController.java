@@ -33,6 +33,7 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_stories;
 import org.telegram.tgnet.tl.TL_update;
 import org.telegram.ui.Components.PermissionRequest;
+import org.telegram.utils.settings.SharedSettings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -945,6 +946,9 @@ public class LocationController extends BaseController implements NotificationCe
             return;
         }
         lastReadLocationTime.put(dialogId, currentDate);
+        if (SharedSettings.benchGramGhostRead.get()) {
+            return;
+        }
         TLObject request;
         if (DialogObject.isChatDialog(dialogId) && ChatObject.isChannel(-dialogId, currentAccount)) {
             TLRPC.TL_channels_readMessageContents req = new TLRPC.TL_channels_readMessageContents();

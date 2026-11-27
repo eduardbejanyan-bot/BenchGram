@@ -18,6 +18,9 @@ import java.util.ArrayList;
 public class BenchGramSettingsActivity extends UniversalFragment {
     private static final int ID_GHOST_STORIES = 1;
     private static final int ID_SAVE_DELETED_MESSAGES = 2;
+    private static final int ID_GHOST_READ = 3;
+    private static final int ID_GHOST_TYPING = 4;
+    private static final int ID_GHOST_ONLINE = 5;
 
     @Override
     protected boolean useSimpleActionBar() {
@@ -50,6 +53,21 @@ public class BenchGramSettingsActivity extends UniversalFragment {
 
     @Override
     protected void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
+        items.add(UItem.asHeader(getString(R.string.BenchGramGhostSection)));
+        items.add(
+            UItem.asCheck(ID_GHOST_READ, getString(R.string.BenchGramGhostRead))
+                .setChecked(SharedSettings.benchGramGhostRead.get())
+        );
+        items.add(
+            UItem.asCheck(ID_GHOST_TYPING, getString(R.string.BenchGramGhostTyping))
+                .setChecked(SharedSettings.benchGramGhostTyping.get())
+        );
+        items.add(
+            UItem.asCheck(ID_GHOST_ONLINE, getString(R.string.BenchGramGhostOnline))
+                .setChecked(SharedSettings.benchGramGhostOnline.get())
+        );
+        items.add(UItem.asShadow(getString(R.string.BenchGramGhostInfo)));
+
         items.add(UItem.asHeader(getString(R.string.BenchGramStoriesSection)));
         items.add(
             UItem.asCheck(ID_GHOST_STORIES, getString(R.string.BenchGramGhostStories))
@@ -72,6 +90,15 @@ public class BenchGramSettingsActivity extends UniversalFragment {
             listView.adapter.update(true);
         } else if (item.id == ID_SAVE_DELETED_MESSAGES) {
             SharedSettings.benchGramSaveDeletedMessages.toggle();
+            listView.adapter.update(true);
+        } else if (item.id == ID_GHOST_READ) {
+            SharedSettings.benchGramGhostRead.toggle();
+            listView.adapter.update(true);
+        } else if (item.id == ID_GHOST_TYPING) {
+            SharedSettings.benchGramGhostTyping.toggle();
+            listView.adapter.update(true);
+        } else if (item.id == ID_GHOST_ONLINE) {
+            SharedSettings.benchGramGhostOnline.toggle();
             listView.adapter.update(true);
         }
     }

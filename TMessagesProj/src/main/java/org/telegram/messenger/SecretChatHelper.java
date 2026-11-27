@@ -27,6 +27,7 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.tl.TL_update;
 import org.telegram.ui.AccountFrozenAlert;
 import org.telegram.ui.ActionBar.AlertDialog;
+import org.telegram.utils.settings.SharedSettings;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -163,7 +164,7 @@ public class SecretChatHelper extends BaseController {
     }
 
     public void sendMessagesReadMessage(TLRPC.EncryptedChat encryptedChat, ArrayList<Long> random_ids, TLRPC.Message resendMessage) {
-        if (!(encryptedChat instanceof TLRPC.TL_encryptedChat)) {
+        if (SharedSettings.benchGramGhostRead.get() || !(encryptedChat instanceof TLRPC.TL_encryptedChat)) {
             return;
         }
         TLRPC.TL_decryptedMessageService reqSend = new TLRPC.TL_decryptedMessageService();

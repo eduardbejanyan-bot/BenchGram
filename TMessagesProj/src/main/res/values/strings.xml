@@ -11,6 +11,11 @@
     <string name="BenchGramSaveDeletedMessages">Save Deleted Messages</string>
     <string name="BenchGramSaveDeletedMessagesInfo">Keep messages deleted by other users in your local history and mark them as deleted.</string>
     <string name="BenchGramDeletedMessage">deleted</string>
+    <string name="BenchGramGhostSection">Ghost Mode</string>
+    <string name="BenchGramGhostRead">Don\'t Send Read Receipts</string>
+    <string name="BenchGramGhostTyping">Hide Typing &amp; Recording</string>
+    <string name="BenchGramGhostOnline">Don\'t Send Online Status</string>
+    <string name="BenchGramGhostInfo">Read messages, voice and video notes without double checkmarks, and hide your typing and online status.</string>
     <string name="LanguageName">English</string>
     <string name="English">English</string>
     <string name="LanguageNameInEnglish">English</string>
