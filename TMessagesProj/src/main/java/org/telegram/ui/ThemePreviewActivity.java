@@ -2571,7 +2571,7 @@ public class ThemePreviewActivity extends BaseFragment implements DownloadContro
                 done = true;
             } else if (wallpaper.resId != 0) {
                 try {
-                    android.graphics.drawable.Drawable drawable = ContextCompat.getDrawable(ApplicationLoader.applicationContext, wallpaper.resId);
+                    android.graphics.drawable.Drawable drawable = androidx.core.content.ContextCompat.getDrawable(ApplicationLoader.applicationContext, wallpaper.resId);
                     if (drawable instanceof android.graphics.drawable.BitmapDrawable) {
                         Bitmap bitmap = ((android.graphics.drawable.BitmapDrawable) drawable).getBitmap();
                         FileOutputStream stream = new FileOutputStream(toFile);
