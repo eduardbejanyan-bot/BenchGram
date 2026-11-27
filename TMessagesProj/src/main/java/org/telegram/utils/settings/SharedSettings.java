@@ -43,6 +43,9 @@ public final class SharedSettings {
     public static final EnumSetting<SimpleActionBarDoneButton.Shape> headerDoneButtonShape =
         EnumSetting.of("header_done_button_shape", SimpleActionBarDoneButton.Shape.TEXT);
 
+    public static final BooleanSetting benchGramGhostStories =
+        BooleanSetting.of("benchgram_ghost_stories", true);
+
     private SharedSettings() {
     }
 }

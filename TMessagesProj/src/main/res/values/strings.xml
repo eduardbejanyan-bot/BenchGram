@@ -2,6 +2,11 @@
 <resources>
     <string name="AppName">BenchGram</string>
     <string name="AppNameBeta">BenchGram</string>
+    <string name="BenchGramSettings">BenchGram Settings</string>
+    <string name="BenchGramSettingsInfo">Privacy &amp; extra features</string>
+    <string name="BenchGramStoriesSection">Stories</string>
+    <string name="BenchGramGhostStories">Ghost Story Viewing</string>
+    <string name="BenchGramGhostStoriesInfo">View other users\' stories without appearing in their viewers list. Note: reacting or replying to a story will still reveal your view.</string>
     <string name="LanguageName">English</string>
     <string name="English">English</string>
     <string name="LanguageNameInEnglish">English</string>
