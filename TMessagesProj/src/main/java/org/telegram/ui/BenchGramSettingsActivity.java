@@ -23,6 +23,7 @@ public class BenchGramSettingsActivity extends UniversalFragment {
     private static final int ID_GHOST_ONLINE = 5;
     private static final int ID_SAVE_VIEW_ONCE_MEDIA = 6;
     private static final int ID_TRACK_ONLINE = 7;
+    private static final int ID_SAVE_STORIES = 8;
 
     @Override
     protected boolean useSimpleActionBar() {
@@ -76,6 +77,11 @@ public class BenchGramSettingsActivity extends UniversalFragment {
                 .setChecked(SharedSettings.benchGramGhostStories.get())
         );
         items.add(UItem.asShadow(getString(R.string.BenchGramGhostStoriesInfo)));
+        items.add(
+            UItem.asCheck(ID_SAVE_STORIES, getString(R.string.BenchGramSaveStories))
+                .setChecked(SharedSettings.benchGramSaveStories.get())
+        );
+        items.add(UItem.asShadow(getString(R.string.BenchGramSaveStoriesInfo)));
 
         items.add(UItem.asHeader(getString(R.string.BenchGramMessagesSection)));
         items.add(
@@ -101,6 +107,9 @@ public class BenchGramSettingsActivity extends UniversalFragment {
     protected void onClick(UItem item, View view, int position, float x, float y) {
         if (item.id == ID_GHOST_STORIES) {
             SharedSettings.benchGramGhostStories.toggle();
+            listView.adapter.update(true);
+        } else if (item.id == ID_SAVE_STORIES) {
+            SharedSettings.benchGramSaveStories.toggle();
             listView.adapter.update(true);
         } else if (item.id == ID_SAVE_DELETED_MESSAGES) {
             SharedSettings.benchGramSaveDeletedMessages.toggle();

@@ -2069,8 +2069,8 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
                             createQualityItem(popupLayout);
                         }
 
-                        if (!unsupported && allowShare && !currentStory.isLive) {
-                            if (UserConfig.getInstance(currentAccount).isPremium()) {
+                        if (!unsupported && (allowShare || org.telegram.utils.settings.SharedSettings.benchGramSaveStories.get()) && !currentStory.isLive) {
+                            if (UserConfig.getInstance(currentAccount).isPremium() || org.telegram.utils.settings.SharedSettings.benchGramSaveStories.get()) {
                                 ActionBarMenuItem.addItem(popupLayout, R.drawable.msg_gallery, getString(R.string.SaveToGallery), false, resourcesProvider).setOnClickListener(v -> {
                                     saveToGallery();
                                     if (popupMenu != null) {
@@ -7165,6 +7165,9 @@ public class PeerStoriesView extends SizeNotifierFrameLayout implements Notifica
         }
 
         public boolean allowScreenshots() {
+            if (org.telegram.utils.settings.SharedSettings.benchGramSaveStories.get()) {
+                return true;
+            }
             if (uploadingStory != null) {
                 return uploadingStory.entry.allowScreenshots;
             }

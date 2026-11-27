@@ -2,6 +2,24 @@
 <resources>
     <string name="AppName">BenchGram</string>
     <string name="AppNameBeta">BenchGram</string>
+    <string name="BenchGramSettings">Настройки BenchGram</string>
+    <string name="BenchGramSettingsInfo">Приватность и дополнительные функции</string>
+    <string name="BenchGramGhostSection">Режим невидимки</string>
+    <string name="BenchGramGhostRead">Не отправлять отчеты о прочтении</string>
+    <string name="BenchGramGhostTyping">Скрывать статус набора текста</string>
+    <string name="BenchGramGhostOnline">Не отправлять статус \"В сети\"</string>
+    <string name="BenchGramGhostInfo">Чтение сообщений, голосовых и видеосообщений без галочек прочтения, а также скрытие статуса набора текста и онлайн.</string>
+    <string name="BenchGramStoriesSection">Истории</string>
+    <string name="BenchGramGhostStories">Анонимный просмотр историй</string>
+    <string name="BenchGramGhostStoriesInfo">Смотреть чужие истории без отображения в списке просмотров. Ответ или реакция на историю покажет ваш просмотр.</string>
+    <string name="BenchGramSaveStories">Сохранять любые истории</string>
+    <string name="BenchGramSaveStoriesInfo">Разрешить сохранение в галерею и скриншоты любых историй (включая личные истории и истории из закрытых каналов).</string>
+    <string name="BenchGramMessagesSection">Сообщения</string>
+    <string name="BenchGramSaveDeletedMessages">Сохранять удаленные сообщения</string>
+    <string name="BenchGramSaveDeletedMessagesInfo">Сохранять сообщения, удаленные другими собеседниками, и помечать их как удаленные.</string>
+    <string name="BenchGramSaveViewOnceMedia">Сохранять самоуничтожающиеся медиа</string>
+    <string name="BenchGramSaveViewOnceMediaInfo">Сохранять одноразовые фото, видео, голосовые и видеосообщения после просмотра, а также разрешить скриншоты.</string>
+    <string name="BenchGramDeletedMessage">удалено</string>
     <string name="LanguageName">Русский</string>
     <string name="English">Английский</string>
     <string name="LanguageNameInEnglish">Russian</string>
