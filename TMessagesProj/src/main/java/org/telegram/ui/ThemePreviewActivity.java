@@ -2567,8 +2567,24 @@ public class ThemePreviewActivity extends BaseFragment implements DownloadContro
             }
         } else if (currentWallpaper instanceof WallpapersListActivity.FileWallpaper) {
             WallpapersListActivity.FileWallpaper wallpaper = (WallpapersListActivity.FileWallpaper) currentWallpaper;
-            if (wallpaper.resId != 0 || Theme.THEME_BACKGROUND_SLUG.equals(wallpaper.slug)) {
+            if (Theme.THEME_BACKGROUND_SLUG.equals(wallpaper.slug)) {
                 done = true;
+            } else if (wallpaper.resId != 0) {
+                try {
+                    android.graphics.drawable.Drawable drawable = ContextCompat.getDrawable(ApplicationLoader.applicationContext, wallpaper.resId);
+                    if (drawable instanceof android.graphics.drawable.BitmapDrawable) {
+                        Bitmap bitmap = ((android.graphics.drawable.BitmapDrawable) drawable).getBitmap();
+                        FileOutputStream stream = new FileOutputStream(toFile);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+                        stream.close();
+                        done = true;
+                    } else {
+                        done = false;
+                    }
+                } catch (Exception e) {
+                    done = false;
+                    FileLog.e(e);
+                }
             } else {
                 try {
                     File fromFile;

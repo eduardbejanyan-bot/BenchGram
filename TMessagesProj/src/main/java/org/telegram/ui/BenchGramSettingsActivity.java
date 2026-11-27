@@ -22,6 +22,7 @@ public class BenchGramSettingsActivity extends UniversalFragment {
     private static final int ID_GHOST_TYPING = 4;
     private static final int ID_GHOST_ONLINE = 5;
     private static final int ID_SAVE_VIEW_ONCE_MEDIA = 6;
+    private static final int ID_TRACK_ONLINE = 7;
 
     @Override
     protected boolean useSimpleActionBar() {
@@ -87,6 +88,13 @@ public class BenchGramSettingsActivity extends UniversalFragment {
                 .setChecked(SharedSettings.benchGramSaveViewOnceMedia.get())
         );
         items.add(UItem.asShadow(getString(R.string.BenchGramSaveViewOnceMediaInfo)));
+
+        items.add(UItem.asHeader(getString(R.string.BenchGramTrackOnlineSection)));
+        items.add(
+            UItem.asCheck(ID_TRACK_ONLINE, getString(R.string.BenchGramTrackOnline))
+                .setChecked(SharedSettings.benchGramTrackOnlineStatus.get())
+        );
+        items.add(UItem.asShadow(getString(R.string.BenchGramTrackOnlineInfo)));
     }
 
     @Override
@@ -108,6 +116,9 @@ public class BenchGramSettingsActivity extends UniversalFragment {
             listView.adapter.update(true);
         } else if (item.id == ID_GHOST_ONLINE) {
             SharedSettings.benchGramGhostOnline.toggle();
+            listView.adapter.update(true);
+        } else if (item.id == ID_TRACK_ONLINE) {
+            SharedSettings.benchGramTrackOnlineStatus.toggle();
             listView.adapter.update(true);
         }
     }

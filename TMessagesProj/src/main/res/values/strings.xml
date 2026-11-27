@@ -18,6 +18,9 @@
     <string name="BenchGramGhostTyping">Hide Typing &amp; Recording</string>
     <string name="BenchGramGhostOnline">Don\'t Send Online Status</string>
     <string name="BenchGramGhostInfo">Read messages, voice and video notes without double checkmarks, and hide your typing and online status.</string>
+    <string name="BenchGramTrackOnlineSection">Online Tracker</string>
+    <string name="BenchGramTrackOnline">Track Exact Online Times</string>
+    <string name="BenchGramTrackOnlineInfo">Remember and show when contacts were actually seen online or typing, even when their status is hidden or set to recently.</string>
     <string name="LanguageName">English</string>
     <string name="English">English</string>
     <string name="LanguageNameInEnglish">English</string>

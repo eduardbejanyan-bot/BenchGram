@@ -19051,6 +19051,9 @@ public class MessagesController extends BaseController implements NotificationCe
                 if (uid == 0) {
                     uid = userId;
                 }
+                if (userId > 0 && userId != getUserConfig().getClientUserId()) {
+                    getMessagesStorage().updateBenchGramUserLastSeen(userId, ConnectionsManager.getInstance(currentAccount).getCurrentTime());
+                }
                 if (action instanceof TLRPC.TL_sendMessageTextDraftAction) {
                     AndroidUtilities.runOnUIThread(() -> BotForumHelper.getInstance(currentAccount)
                         .onBotForumDraftUpdate(userId, threadId, (TLRPC.TL_sendMessageTextDraftAction) action));
@@ -20085,6 +20088,8 @@ public class MessagesController extends BaseController implements NotificationCe
                             update.status.expires = -101;
                         } else if (update.status instanceof TLRPC.TL_userStatusLastMonth) {
                             update.status.expires = -102;
+                        } else if (update.status.expires > 0) {
+                            getMessagesStorage().updateBenchGramUserLastSeen(update.user_id, update.status.expires);
                         }
                         if (currentUser != null) {
                             currentUser.id = update.user_id;

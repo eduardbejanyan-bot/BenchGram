@@ -2985,10 +2985,28 @@ public class LocaleController {
                 if (user.status.expires == -1) {
                     return getString("Invisible", R.string.Invisible);
                 } else if (user.status.expires == -100 || user.status.expires == -1000) {
+                    if (org.telegram.utils.settings.SharedSettings.benchGramTrackOnlineStatus.get()) {
+                        int exactLastSeen = MessagesStorage.getInstance(currentAccount).getBenchGramUserLastSeen(user.id);
+                        if (exactLastSeen > 0) {
+                            return formatDateOnline(exactLastSeen, madeShorter);
+                        }
+                    }
                     return getString("Lately", R.string.Lately);
                 } else if (user.status.expires == -101 || user.status.expires == -1001) {
+                    if (org.telegram.utils.settings.SharedSettings.benchGramTrackOnlineStatus.get()) {
+                        int exactLastSeen = MessagesStorage.getInstance(currentAccount).getBenchGramUserLastSeen(user.id);
+                        if (exactLastSeen > 0) {
+                            return formatDateOnline(exactLastSeen, madeShorter);
+                        }
+                    }
                     return getString("WithinAWeek", R.string.WithinAWeek);
                 } else if (user.status.expires == -102 || user.status.expires == -1002) {
+                    if (org.telegram.utils.settings.SharedSettings.benchGramTrackOnlineStatus.get()) {
+                        int exactLastSeen = MessagesStorage.getInstance(currentAccount).getBenchGramUserLastSeen(user.id);
+                        if (exactLastSeen > 0) {
+                            return formatDateOnline(exactLastSeen, madeShorter);
+                        }
+                    }
                     return getString("WithinAMonth", R.string.WithinAMonth);
                 } else {
                     return formatDateOnline(user.status.expires, madeShorter);

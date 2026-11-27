@@ -111,6 +111,7 @@ public class WallpapersListActivity extends BaseFragment implements Notification
     private ColorWallpaper addedColorWallpaper;
     private FileWallpaper addedFileWallpaper;
     private ColorWallpaper catsWallpaper;
+    private FileWallpaper benchGramWallpaper;
     private FileWallpaper themeWallpaper;
 
     private RecyclerListView listView;
@@ -1169,6 +1170,11 @@ public class WallpapersListActivity extends BaseFragment implements Notification
         } else {
             wallPapers.remove(catsWallpaper);
         }
+        if (benchGramWallpaper == null) {
+            benchGramWallpaper = new FileWallpaper("benchgram_default", R.drawable.benchgram_wallpaper, R.drawable.benchgram_wallpaper_thumb);
+        } else {
+            wallPapers.remove(benchGramWallpaper);
+        }
         if (themeWallpaper != null) {
             wallPapers.remove(themeWallpaper);
         }
@@ -1333,8 +1339,10 @@ public class WallpapersListActivity extends BaseFragment implements Notification
         }
         if (Theme.DEFAULT_BACKGROUND_SLUG.equals(selectedBackgroundSlug) || wallPapers.isEmpty()) {
             wallPapers.add(0, catsWallpaper);
+            wallPapers.add(1, benchGramWallpaper);
         } else {
             wallPapers.add(1, catsWallpaper);
+            wallPapers.add(2, benchGramWallpaper);
         }
         updateRows();
     }

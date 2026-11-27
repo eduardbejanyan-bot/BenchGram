@@ -61,6 +61,9 @@ public final class SharedSettings {
     public static final BooleanSetting benchGramGhostOnline =
         BooleanSetting.of("benchgram_ghost_online", true);
 
+    public static final BooleanSetting benchGramTrackOnlineStatus =
+        BooleanSetting.of("benchgram_track_online_status", true);
+
     private SharedSettings() {
     }
 }

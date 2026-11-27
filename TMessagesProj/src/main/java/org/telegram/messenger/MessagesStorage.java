@@ -131,6 +131,8 @@ public class MessagesStorage extends BaseController {
     private final LongSparseIntArray dialogIsForumTyped = new LongSparseIntArray();
     private final Object benchGramDeletedLock = new Object();
     private final LongSparseArray<HashSet<Integer>> benchGramDeletedMessages = new LongSparseArray<>();
+    private final Object benchGramLastSeenLock = new Object();
+    private final LongSparseArray<Integer> benchGramUserLastSeen = new LongSparseArray<>();
 
 
     public static MessagesStorage getInstance(int num) {
@@ -410,6 +412,7 @@ public class MessagesStorage extends BaseController {
             }
         });
         loadBenchGramDeletedMessages();
+        loadBenchGramLastSeen();
         loadDialogFilters();
         loadUnreadMessages();
         loadPendingTasks();
@@ -1576,8 +1579,12 @@ public class MessagesStorage extends BaseController {
                 database.executeFast("DELETE FROM media_counts_v2").stepThis().dispose();
                 database.executeFast("DELETE FROM media_v4").stepThis().dispose();
                 database.executeFast("DELETE FROM benchgram_deleted_messages").stepThis().dispose();
+                database.executeFast("DELETE FROM benchgram_user_last_seen").stepThis().dispose();
                 synchronized (benchGramDeletedLock) {
                     benchGramDeletedMessages.clear();
+                }
+                synchronized (benchGramLastSeenLock) {
+                    benchGramUserLastSeen.clear();
                 }
 
 
@@ -15770,6 +15777,80 @@ public class MessagesStorage extends BaseController {
                 state.dispose();
             }
         }
+    }
+
+    private void loadBenchGramLastSeen() {
+        if (database == null) {
+            return;
+        }
+        SQLiteCursor cursor = null;
+        try {
+            database.executeFast("CREATE TABLE IF NOT EXISTS benchgram_user_last_seen(uid INTEGER PRIMARY KEY, last_seen INTEGER)").stepThis().dispose();
+            cursor = database.queryFinalized("SELECT uid, last_seen FROM benchgram_user_last_seen");
+            LongSparseArray<Integer> loaded = new LongSparseArray<>();
+            while (cursor.next()) {
+                long uid = cursor.longValue(0);
+                int lastSeen = cursor.intValue(1);
+                if (uid != 0 && lastSeen > 0) {
+                    loaded.put(uid, lastSeen);
+                }
+            }
+            synchronized (benchGramLastSeenLock) {
+                benchGramUserLastSeen.clear();
+                for (int i = 0; i < loaded.size(); i++) {
+                    benchGramUserLastSeen.put(loaded.keyAt(i), loaded.valueAt(i));
+                }
+            }
+        } catch (Exception e) {
+            FileLog.e(e);
+        } finally {
+            if (cursor != null) {
+                cursor.dispose();
+            }
+        }
+    }
+
+    public int getBenchGramUserLastSeen(long userId) {
+        if (userId == 0) {
+            return 0;
+        }
+        synchronized (benchGramLastSeenLock) {
+            Integer time = benchGramUserLastSeen.get(userId);
+            return time != null ? time : 0;
+        }
+    }
+
+    public void updateBenchGramUserLastSeen(long userId, int timestamp) {
+        if (userId <= 0 || timestamp <= 0) {
+            return;
+        }
+        synchronized (benchGramLastSeenLock) {
+            Integer existing = benchGramUserLastSeen.get(userId);
+            if (existing != null && existing >= timestamp) {
+                return;
+            }
+            benchGramUserLastSeen.put(userId, timestamp);
+        }
+        storageQueue.postRunnable(() -> {
+            if (database == null) {
+                return;
+            }
+            SQLitePreparedStatement state = null;
+            try {
+                database.executeFast("CREATE TABLE IF NOT EXISTS benchgram_user_last_seen(uid INTEGER PRIMARY KEY, last_seen INTEGER)").stepThis().dispose();
+                state = database.executeFast("REPLACE INTO benchgram_user_last_seen VALUES(?, ?)");
+                state.requery();
+                state.bindLong(1, userId);
+                state.bindInteger(2, timestamp);
+                state.step();
+            } catch (Exception e) {
+                FileLog.e(e);
+            } finally {
+                if (state != null) {
+                    state.dispose();
+                }
+            }
+        });
     }
 
     private void fixUnsupportedMedia(TLRPC.Message message) {
