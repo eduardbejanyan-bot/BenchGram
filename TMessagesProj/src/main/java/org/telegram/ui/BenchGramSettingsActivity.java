@@ -21,6 +21,7 @@ public class BenchGramSettingsActivity extends UniversalFragment {
     private static final int ID_GHOST_READ = 3;
     private static final int ID_GHOST_TYPING = 4;
     private static final int ID_GHOST_ONLINE = 5;
+    private static final int ID_SAVE_VIEW_ONCE_MEDIA = 6;
 
     @Override
     protected boolean useSimpleActionBar() {
@@ -81,6 +82,11 @@ public class BenchGramSettingsActivity extends UniversalFragment {
                 .setChecked(SharedSettings.benchGramSaveDeletedMessages.get())
         );
         items.add(UItem.asShadow(getString(R.string.BenchGramSaveDeletedMessagesInfo)));
+        items.add(
+            UItem.asCheck(ID_SAVE_VIEW_ONCE_MEDIA, getString(R.string.BenchGramSaveViewOnceMedia))
+                .setChecked(SharedSettings.benchGramSaveViewOnceMedia.get())
+        );
+        items.add(UItem.asShadow(getString(R.string.BenchGramSaveViewOnceMediaInfo)));
     }
 
     @Override
@@ -90,6 +96,9 @@ public class BenchGramSettingsActivity extends UniversalFragment {
             listView.adapter.update(true);
         } else if (item.id == ID_SAVE_DELETED_MESSAGES) {
             SharedSettings.benchGramSaveDeletedMessages.toggle();
+            listView.adapter.update(true);
+        } else if (item.id == ID_SAVE_VIEW_ONCE_MEDIA) {
+            SharedSettings.benchGramSaveViewOnceMedia.toggle();
             listView.adapter.update(true);
         } else if (item.id == ID_GHOST_READ) {
             SharedSettings.benchGramGhostRead.toggle();

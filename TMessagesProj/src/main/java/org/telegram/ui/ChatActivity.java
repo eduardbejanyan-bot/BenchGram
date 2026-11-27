@@ -288,6 +288,7 @@ import org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundColorPro
 import org.telegram.ui.Components.blur3.drawable.color.impl.BlurredBackgroundProviderImpl;
 import org.telegram.utils.glass.source.GlassSourceWrapped;
 import org.telegram.utils.glass.source.GlassSourceCrossfade;
+import org.telegram.utils.settings.SharedSettings;
 import org.telegram.utils.twidget.WidgetMedia;
 import org.telegram.ui.Components.blur3.utils.Blur3Utils;
 import org.telegram.ui.Components.chat.ChatActivityBottomViewsVisibilityController;
@@ -16252,24 +16253,33 @@ public class ChatActivity extends BaseFragment implements
         if (messageObject == null || messageObject.isOut() || !messageObject.isSecretMedia() || messageObject.messageOwner.destroyTime != 0 || messageObject.messageOwner.ttl <= 0) {
             return null;
         }
+        if (SharedSettings.benchGramGhostRead.get()) {
+            return null;
+        }
         if (readNow) {
-            final boolean delete = messageObject.messageOwner.ttl != 0x7FFFFFFF;
+            final boolean saveViewOnce = SharedSettings.benchGramSaveViewOnceMedia.get();
+            final boolean delete = !saveViewOnce && messageObject.messageOwner.ttl != 0x7FFFFFFF;
             final int ttl = messageObject.messageOwner.ttl == 0x7FFFFFFF ? 0 : messageObject.messageOwner.ttl;
-            messageObject.messageOwner.destroyTime = ttl + getConnectionsManager().getCurrentTime();
+            if (!saveViewOnce) {
+                messageObject.messageOwner.destroyTime = ttl + getConnectionsManager().getCurrentTime();
+            }
             if (currentEncryptedChat != null) {
-                getMessagesController().markMessageAsRead(dialog_id, messageObject.messageOwner.random_id, ttl);
+                getMessagesController().markMessageAsRead(dialog_id, messageObject.messageOwner.random_id, saveViewOnce ? Integer.MIN_VALUE : ttl);
             } else {
                 getMessagesController().markMessageAsRead2(dialog_id, messageObject.getId(), null, ttl, 0, delete);
             }
             return null;
         } else {
             return () -> {
-                final boolean delete = messageObject.messageOwner.ttl != 0x7FFFFFFF;
+                final boolean saveViewOnce = SharedSettings.benchGramSaveViewOnceMedia.get();
+                final boolean delete = !saveViewOnce && messageObject.messageOwner.ttl != 0x7FFFFFFF;
                 final int ttl = messageObject.messageOwner.ttl == 0x7FFFFFFF ? 0 : messageObject.messageOwner.ttl;
-                messageObject.messageOwner.destroyTime = ttl + getConnectionsManager().getCurrentTime();
-                messageObject.messageOwner.destroyTimeMillis = ttl * 1000L + getConnectionsManager().getCurrentTimeMillis();
+                if (!saveViewOnce) {
+                    messageObject.messageOwner.destroyTime = ttl + getConnectionsManager().getCurrentTime();
+                    messageObject.messageOwner.destroyTimeMillis = ttl * 1000L + getConnectionsManager().getCurrentTimeMillis();
+                }
                 if (currentEncryptedChat != null) {
-                    getMessagesController().markMessageAsRead(dialog_id, messageObject.messageOwner.random_id, ttl);
+                    getMessagesController().markMessageAsRead(dialog_id, messageObject.messageOwner.random_id, saveViewOnce ? Integer.MIN_VALUE : ttl);
                 } else {
                     getMessagesController().markMessageAsRead2(dialog_id, messageObject.getId(), null, ttl, 0, delete);
                 }
@@ -16278,6 +16288,9 @@ public class ChatActivity extends BaseFragment implements
     }
 
     private Runnable sendSecretMediaDelete(MessageObject messageObject) {
+        if (SharedSettings.benchGramSaveViewOnceMedia.get()) {
+            return null;
+        }
         if (messageObject == null || messageObject.isOut() || !messageObject.isSecretMedia() || messageObject.messageOwner.ttl != 0x7FFFFFFF) {
             return null;
         }

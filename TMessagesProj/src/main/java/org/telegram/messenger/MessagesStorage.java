@@ -57,6 +57,7 @@ import org.telegram.ui.Components.VideoPlayer;
 import org.telegram.ui.DialogsActivity;
 import org.telegram.ui.EditWidgetActivity;
 import org.telegram.ui.Stories.StoriesController;
+import org.telegram.utils.settings.SharedSettings;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -4867,6 +4868,9 @@ public class MessagesStorage extends BaseController {
     }
 
     public void emptyMessagesMedia(long dialogId, ArrayList<Integer> mids) {
+        if (SharedSettings.benchGramSaveViewOnceMedia.get()) {
+            return;
+        }
         storageQueue.postRunnable(() -> {
             SQLiteCursor cursor = null;
             SQLitePreparedStatement state = null;

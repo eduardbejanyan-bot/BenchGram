@@ -10,6 +10,8 @@
     <string name="BenchGramMessagesSection">Messages</string>
     <string name="BenchGramSaveDeletedMessages">Save Deleted Messages</string>
     <string name="BenchGramSaveDeletedMessagesInfo">Keep messages deleted by other users in your local history and mark them as deleted.</string>
+    <string name="BenchGramSaveViewOnceMedia">Save View-Once Media</string>
+    <string name="BenchGramSaveViewOnceMediaInfo">Keep view-once and self-destructing photos, videos, voice and video messages after viewing, and allow screenshots.</string>
     <string name="BenchGramDeletedMessage">deleted</string>
     <string name="BenchGramGhostSection">Ghost Mode</string>
     <string name="BenchGramGhostRead">Don\'t Send Read Receipts</string>

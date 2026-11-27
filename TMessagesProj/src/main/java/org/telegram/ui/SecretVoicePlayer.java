@@ -53,6 +53,7 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.messenger.UserConfig;
+import org.telegram.utils.settings.SharedSettings;
 import org.telegram.messenger.UserObject;
 import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.TLRPC;
@@ -239,7 +240,7 @@ public class SecretVoicePlayer extends Dialog {
             WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR |
             WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS |
             WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
-        if (!BuildVars.DEBUG_PRIVATE_VERSION) {
+        if (!BuildVars.DEBUG_PRIVATE_VERSION && !SharedSettings.benchGramSaveViewOnceMedia.get()) {
             params.flags |= WindowManager.LayoutParams.FLAG_SECURE;
             AndroidUtilities.logFlagSecure();
         }

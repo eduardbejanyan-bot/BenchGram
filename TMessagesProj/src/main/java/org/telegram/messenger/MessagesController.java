@@ -8319,7 +8319,7 @@ public class MessagesController extends BaseController implements NotificationCe
                         deleteMessages(mids, null, null, task.keyAt(a), 0, true, 0, !mids.isEmpty() && mids.get(0) > 0);
                     }
                 }
-                if (taskMedia != null) {
+                if (taskMedia != null && !SharedSettings.benchGramSaveViewOnceMedia.get()) {
                     final boolean checkViewer = SecretMediaViewer.hasInstance() && SecretMediaViewer.getInstance().isVisible();
                     final MessageObject viewerObject = checkViewer ? SecretMediaViewer.getInstance().getCurrentMessageObject() : null;
                     for (int a = 0, N = taskMedia.size(); a < N; a++) {
@@ -14516,6 +14516,9 @@ public class MessagesController extends BaseController implements NotificationCe
 
     public void doDeleteShowOnceTask(long taskId, long dialogId, int mid) {
         getMessagesStorage().removePendingTask(taskId);
+        if (SharedSettings.benchGramSaveViewOnceMedia.get()) {
+            return;
+        }
         ArrayList<Integer> mids = new ArrayList<>();
         mids.add(mid);
         getMessagesStorage().emptyMessagesMedia(dialogId, mids);
@@ -14528,6 +14531,9 @@ public class MessagesController extends BaseController implements NotificationCe
     public void markMessageAsRead2(long dialogId, int mid, TLRPC.InputChannel inputChannel, int ttl, long taskId, boolean createDeleteTask) {
         if (mid == 0 || ttl < 0) {
             return;
+        }
+        if (SharedSettings.benchGramSaveViewOnceMedia.get()) {
+            createDeleteTask = false;
         }
         if (DialogObject.isChatDialog(dialogId) && inputChannel == null) {
             inputChannel = getInputChannel(dialogId);
@@ -14557,6 +14563,12 @@ public class MessagesController extends BaseController implements NotificationCe
         int time = getConnectionsManager().getCurrentTime();
         if (createDeleteTask) {
             getMessagesStorage().createTaskForMid(dialogId, mid, time, time, ttl, false);
+        }
+        if (SharedSettings.benchGramGhostRead.get()) {
+            if (newTaskId != 0) {
+                getMessagesStorage().removePendingTask(newTaskId);
+            }
+            return;
         }
         if (inputChannel != null) {
             TLRPC.TL_channels_readMessageContents req = new TLRPC.TL_channels_readMessageContents();
