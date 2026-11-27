@@ -15655,6 +15655,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             }
         }
         timeString = timeString(currentMessageObject, messageObject, edited, currentMessagesGroup != null ? currentMessagesGroup.getMaxEditDate() : messageObject.messageOwner.edit_date);
+        if (!TextUtils.isEmpty(timeString) && (currentMessageObject.isBenchGramDeleted() || (messageObject != null && messageObject.isBenchGramDeleted()))) {
+            timeString = getString(R.string.BenchGramDeletedMessage) + " " + timeString;
+        }
         if (currentMessageObject.messageOwner.video_processing_pending) {
             timeString = formatString(R.string.ScheduledTimeApprox, timeString);
         }

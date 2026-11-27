@@ -7,6 +7,10 @@
     <string name="BenchGramStoriesSection">Stories</string>
     <string name="BenchGramGhostStories">Ghost Story Viewing</string>
     <string name="BenchGramGhostStoriesInfo">View other users\' stories without appearing in their viewers list. Note: reacting or replying to a story will still reveal your view.</string>
+    <string name="BenchGramMessagesSection">Messages</string>
+    <string name="BenchGramSaveDeletedMessages">Save Deleted Messages</string>
+    <string name="BenchGramSaveDeletedMessagesInfo">Keep messages deleted by other users in your local history and mark them as deleted.</string>
+    <string name="BenchGramDeletedMessage">deleted</string>
     <string name="LanguageName">English</string>
     <string name="English">English</string>
     <string name="LanguageNameInEnglish">English</string>

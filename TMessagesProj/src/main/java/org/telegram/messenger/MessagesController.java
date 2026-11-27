@@ -111,6 +111,7 @@ import org.telegram.ui.SecretMediaViewer;
 import org.telegram.ui.Stars.BotStarsController;
 import org.telegram.ui.Stars.StarsController;
 import org.telegram.ui.Stories.StoriesController;
+import org.telegram.utils.settings.SharedSettings;
 import org.telegram.ui.ThemeActivity;
 import org.telegram.ui.TopicsFragment;
 import org.telegram.ui.Wallet.GramWallet;
@@ -17634,6 +17635,37 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     protected void deleteMessagesByPush(long dialogId, ArrayList<Integer> ids, long channelId) {
+        if (SharedSettings.benchGramSaveDeletedMessages.get()) {
+            getMessagesStorage().getStorageQueue().postRunnable(() -> {
+                getMessagesStorage().markMessagesBenchGramDeleted(dialogId, ids);
+            });
+            AndroidUtilities.runOnUIThread(() -> {
+                if (channelId == 0) {
+                    for (int b = 0, size2 = ids.size(); b < size2; b++) {
+                        Integer id = ids.get(b);
+                        MessageObject obj = dialogMessagesByIds.get(id);
+                        if (obj != null) {
+                            obj.benchGramDeleted = true;
+                        }
+                    }
+                } else {
+                    ArrayList<MessageObject> objs = dialogMessage.get(-channelId);
+                    if (objs != null) {
+                        for (int i = 0; i < objs.size(); ++i) {
+                            MessageObject obj = objs.get(i);
+                            for (int b = 0, size2 = ids.size(); b < size2; b++) {
+                                if (obj.getId() == ids.get(b)) {
+                                    obj.benchGramDeleted = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                getNotificationCenter().postNotificationName(NotificationCenter.benchGramMessagesDeleted);
+            });
+            return;
+        }
         getMessagesStorage().getStorageQueue().postRunnable(() -> {
             AndroidUtilities.runOnUIThread(() -> {
                 getNotificationCenter().postNotificationName(NotificationCenter.messagesDeleted, ids, channelId, false);
@@ -21205,42 +21237,77 @@ public class MessagesController extends BaseController implements NotificationCe
                 }
             }
             if (deletedMessagesFinal != null) {
-                for (int a = 0, size = deletedMessagesFinal.size(); a < size; a++) {
-                    long dialogId = deletedMessagesFinal.keyAt(a);
-                    ArrayList<Integer> arrayList = deletedMessagesFinal.valueAt(a);
-                    if (arrayList == null) {
-                        continue;
-                    }
-                    getNotificationCenter().postNotificationName(NotificationCenter.messagesDeleted, arrayList, -dialogId, false);
-                    if (dialogId == 0) {
-                        for (int b = 0, size2 = arrayList.size(); b < size2; b++) {
-                            Integer id = arrayList.get(b);
-                            MessageObject obj = dialogMessagesByIds.get(id);
-                            if (obj != null) {
-                                if (BuildVars.LOGS_ENABLED) {
-                                    FileLog.d("mark messages " + obj.getId() + " deleted");
-                                }
-                                obj.deleted = true;
-                            }
+                if (SharedSettings.benchGramSaveDeletedMessages.get()) {
+                    for (int a = 0, size = deletedMessagesFinal.size(); a < size; a++) {
+                        long dialogId = deletedMessagesFinal.keyAt(a);
+                        ArrayList<Integer> arrayList = deletedMessagesFinal.valueAt(a);
+                        if (arrayList == null) {
+                            continue;
                         }
-                    } else {
-                        ArrayList<MessageObject> objs = dialogMessage.get(dialogId);
-                        if (objs != null) {
-                            for (int i = 0; i < objs.size(); ++i) {
-                                MessageObject obj = objs.get(i);
+                        if (dialogId == 0) {
+                            for (int b = 0, size2 = arrayList.size(); b < size2; b++) {
+                                Integer id = arrayList.get(b);
+                                MessageObject obj = dialogMessagesByIds.get(id);
                                 if (obj != null) {
-                                    for (int b = 0, size2 = arrayList.size(); b < size2; b++) {
-                                        if (obj.getId() == arrayList.get(b)) {
-                                            obj.deleted = true;
-                                            break;
+                                    obj.benchGramDeleted = true;
+                                }
+                            }
+                        } else {
+                            ArrayList<MessageObject> objs = dialogMessage.get(dialogId);
+                            if (objs != null) {
+                                for (int i = 0; i < objs.size(); ++i) {
+                                    MessageObject obj = objs.get(i);
+                                    if (obj != null) {
+                                        for (int b = 0, size2 = arrayList.size(); b < size2; b++) {
+                                            if (obj.getId() == arrayList.get(b)) {
+                                                obj.benchGramDeleted = true;
+                                                break;
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
+                    getNotificationCenter().postNotificationName(NotificationCenter.benchGramMessagesDeleted);
+                } else {
+                    for (int a = 0, size = deletedMessagesFinal.size(); a < size; a++) {
+                        long dialogId = deletedMessagesFinal.keyAt(a);
+                        ArrayList<Integer> arrayList = deletedMessagesFinal.valueAt(a);
+                        if (arrayList == null) {
+                            continue;
+                        }
+                        getNotificationCenter().postNotificationName(NotificationCenter.messagesDeleted, arrayList, -dialogId, false);
+                        if (dialogId == 0) {
+                            for (int b = 0, size2 = arrayList.size(); b < size2; b++) {
+                                Integer id = arrayList.get(b);
+                                MessageObject obj = dialogMessagesByIds.get(id);
+                                if (obj != null) {
+                                    if (BuildVars.LOGS_ENABLED) {
+                                        FileLog.d("mark messages " + obj.getId() + " deleted");
+                                    }
+                                    obj.deleted = true;
+                                }
+                            }
+                        } else {
+                            ArrayList<MessageObject> objs = dialogMessage.get(dialogId);
+                            if (objs != null) {
+                                for (int i = 0; i < objs.size(); ++i) {
+                                    MessageObject obj = objs.get(i);
+                                    if (obj != null) {
+                                        for (int b = 0, size2 = arrayList.size(); b < size2; b++) {
+                                            if (obj.getId() == arrayList.get(b)) {
+                                                obj.deleted = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    getNotificationsController().removeDeletedMessagesFromNotifications(deletedMessagesFinal, false);
                 }
-                getNotificationsController().removeDeletedMessagesFromNotifications(deletedMessagesFinal, false);
             }
             if (deletedQuickRepliesMessagesFinal != null) {
                 for (int a = 0, size = deletedQuickRepliesMessagesFinal.size(); a < size; a++) {
@@ -21325,12 +21392,17 @@ public class MessagesController extends BaseController implements NotificationCe
             }
         }
         if (deletedMessages != null) {
+            final boolean saveDeleted = SharedSettings.benchGramSaveDeletedMessages.get();
             for (int a = 0, size = deletedMessages.size(); a < size; a++) {
                 long key = deletedMessages.keyAt(a);
                 ArrayList<Integer> arrayList = deletedMessages.valueAt(a);
                 getMessagesStorage().getStorageQueue().postRunnable(() -> {
-                    ArrayList<Long> dialogIds = getMessagesStorage().markMessagesAsDeleted(key, arrayList, false, true, 0, 0);
-                    getMessagesStorage().updateDialogsWithDeletedMessages(key, -key, arrayList, dialogIds);
+                    if (saveDeleted) {
+                        getMessagesStorage().markMessagesBenchGramDeleted(key, arrayList);
+                    } else {
+                        ArrayList<Long> dialogIds = getMessagesStorage().markMessagesAsDeleted(key, arrayList, false, true, 0, 0);
+                        getMessagesStorage().updateDialogsWithDeletedMessages(key, -key, arrayList, dialogIds);
+                    }
                 });
             }
         }

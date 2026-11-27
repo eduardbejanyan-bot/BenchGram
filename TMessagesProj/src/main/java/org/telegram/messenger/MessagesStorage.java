@@ -128,6 +128,8 @@ public class MessagesStorage extends BaseController {
     public static final int FORUM_TYPE_BOT = 1 << 3;
 
     private final LongSparseIntArray dialogIsForumTyped = new LongSparseIntArray();
+    private final Object benchGramDeletedLock = new Object();
+    private final LongSparseArray<HashSet<Integer>> benchGramDeletedMessages = new LongSparseArray<>();
 
 
     public static MessagesStorage getInstance(int num) {
@@ -406,6 +408,7 @@ public class MessagesStorage extends BaseController {
                 NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.onDatabaseMigration, false);
             }
         });
+        loadBenchGramDeletedMessages();
         loadDialogFilters();
         loadUnreadMessages();
         loadPendingTasks();
@@ -1571,6 +1574,10 @@ public class MessagesStorage extends BaseController {
                 database.executeFast("DELETE FROM premium_promo").stepThis().dispose();
                 database.executeFast("DELETE FROM media_counts_v2").stepThis().dispose();
                 database.executeFast("DELETE FROM media_v4").stepThis().dispose();
+                database.executeFast("DELETE FROM benchgram_deleted_messages").stepThis().dispose();
+                synchronized (benchGramDeletedLock) {
+                    benchGramDeletedMessages.clear();
+                }
 
 
                 cursor = database.queryFinalized("SELECT did FROM dialogs WHERE 1");
@@ -15641,6 +15648,124 @@ public class MessagesStorage extends BaseController {
             return markMessagesAsDeletedInternal(channelId, mid, deleteFiles);
         }
         return null;
+    }
+
+    private void loadBenchGramDeletedMessages() {
+        if (database == null) {
+            return;
+        }
+        SQLiteCursor cursor = null;
+        try {
+            database.executeFast("CREATE TABLE IF NOT EXISTS benchgram_deleted_messages(uid INTEGER, mid INTEGER, PRIMARY KEY(uid, mid))").stepThis().dispose();
+            cursor = database.queryFinalized("SELECT uid, mid FROM benchgram_deleted_messages");
+            LongSparseArray<HashSet<Integer>> loaded = new LongSparseArray<>();
+            while (cursor.next()) {
+                long uid = cursor.longValue(0);
+                int mid = cursor.intValue(1);
+                HashSet<Integer> set = loaded.get(uid);
+                if (set == null) {
+                    set = new HashSet<>();
+                    loaded.put(uid, set);
+                }
+                set.add(mid);
+            }
+            synchronized (benchGramDeletedLock) {
+                benchGramDeletedMessages.clear();
+                for (int i = 0; i < loaded.size(); i++) {
+                    benchGramDeletedMessages.put(loaded.keyAt(i), loaded.valueAt(i));
+                }
+            }
+        } catch (Exception e) {
+            FileLog.e(e);
+        } finally {
+            if (cursor != null) {
+                cursor.dispose();
+            }
+        }
+    }
+
+    public boolean isBenchGramDeleted(long dialogId, int mid) {
+        if (mid == 0) {
+            return false;
+        }
+        synchronized (benchGramDeletedLock) {
+            HashSet<Integer> set = benchGramDeletedMessages.get(dialogId);
+            return set != null && set.contains(mid);
+        }
+    }
+
+    public void markMessagesBenchGramDeleted(long dialogId, ArrayList<Integer> messages) {
+        if (messages == null || messages.isEmpty() || database == null) {
+            return;
+        }
+        SQLiteCursor cursor = null;
+        SQLitePreparedStatement state = null;
+        boolean inTransaction = false;
+        try {
+            database.executeFast("CREATE TABLE IF NOT EXISTS benchgram_deleted_messages(uid INTEGER, mid INTEGER, PRIMARY KEY(uid, mid))").stepThis().dispose();
+            ArrayList<Pair<Long, Integer>> toMark = new ArrayList<>();
+            if (dialogId != 0) {
+                for (int i = 0, n = messages.size(); i < n; i++) {
+                    Integer mid = messages.get(i);
+                    if (mid != null && mid != 0) {
+                        toMark.add(new Pair<>(dialogId, mid));
+                    }
+                }
+            } else {
+                String ids = TextUtils.join(",", messages);
+                cursor = database.queryFinalized(String.format(Locale.US, "SELECT uid, mid FROM messages_v2 WHERE mid IN(%s) AND is_channel = 0", ids));
+                while (cursor.next()) {
+                    long uid = cursor.longValue(0);
+                    int mid = cursor.intValue(1);
+                    if (mid != 0) {
+                        toMark.add(new Pair<>(uid, mid));
+                    }
+                }
+                cursor.dispose();
+                cursor = null;
+            }
+            if (toMark.isEmpty()) {
+                return;
+            }
+            database.beginTransaction();
+            inTransaction = true;
+            state = database.executeFast("REPLACE INTO benchgram_deleted_messages VALUES(?, ?)");
+            for (int i = 0, n = toMark.size(); i < n; i++) {
+                Pair<Long, Integer> pair = toMark.get(i);
+                state.requery();
+                state.bindLong(1, pair.first);
+                state.bindInteger(2, pair.second);
+                state.step();
+            }
+            state.dispose();
+            state = null;
+            database.commitTransaction();
+            inTransaction = false;
+            synchronized (benchGramDeletedLock) {
+                for (int i = 0, n = toMark.size(); i < n; i++) {
+                    Pair<Long, Integer> pair = toMark.get(i);
+                    HashSet<Integer> set = benchGramDeletedMessages.get(pair.first);
+                    if (set == null) {
+                        set = new HashSet<>();
+                        benchGramDeletedMessages.put(pair.first, set);
+                    }
+                    set.add(pair.second);
+                }
+            }
+            AndroidUtilities.runOnUIThread(() -> getNotificationCenter().postNotificationName(NotificationCenter.benchGramMessagesDeleted));
+        } catch (Exception e) {
+            checkSQLException(e);
+        } finally {
+            if (inTransaction && database != null) {
+                database.commitTransaction();
+            }
+            if (cursor != null) {
+                cursor.dispose();
+            }
+            if (state != null) {
+                state.dispose();
+            }
+        }
     }
 
     private void fixUnsupportedMedia(TLRPC.Message message) {

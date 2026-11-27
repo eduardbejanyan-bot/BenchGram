@@ -229,6 +229,14 @@ public class MessageObject {
     public String monthKey;
     public boolean deleted;
     public boolean deletedByThanos;
+    public boolean benchGramDeleted;
+
+    public boolean isBenchGramDeleted() {
+        if (benchGramDeleted) {
+            return true;
+        }
+        return MessagesStorage.getInstance(currentAccount).isBenchGramDeleted(getDialogId(), getId());
+    }
     public float audioProgress;
     public float forceSeekTo = -1;
     public int audioProgressMs;

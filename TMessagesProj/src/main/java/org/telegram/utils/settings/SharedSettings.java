@@ -46,6 +46,9 @@ public final class SharedSettings {
     public static final BooleanSetting benchGramGhostStories =
         BooleanSetting.of("benchgram_ghost_stories", true);
 
+    public static final BooleanSetting benchGramSaveDeletedMessages =
+        BooleanSetting.of("benchgram_save_deleted_messages", true);
+
     private SharedSettings() {
     }
 }

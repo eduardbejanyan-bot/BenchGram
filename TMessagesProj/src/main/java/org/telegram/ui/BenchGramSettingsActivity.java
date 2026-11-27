@@ -17,6 +17,7 @@ import java.util.ArrayList;
 /** BenchGram privacy and customization settings screen. */
 public class BenchGramSettingsActivity extends UniversalFragment {
     private static final int ID_GHOST_STORIES = 1;
+    private static final int ID_SAVE_DELETED_MESSAGES = 2;
 
     @Override
     protected boolean useSimpleActionBar() {
@@ -55,12 +56,22 @@ public class BenchGramSettingsActivity extends UniversalFragment {
                 .setChecked(SharedSettings.benchGramGhostStories.get())
         );
         items.add(UItem.asShadow(getString(R.string.BenchGramGhostStoriesInfo)));
+
+        items.add(UItem.asHeader(getString(R.string.BenchGramMessagesSection)));
+        items.add(
+            UItem.asCheck(ID_SAVE_DELETED_MESSAGES, getString(R.string.BenchGramSaveDeletedMessages))
+                .setChecked(SharedSettings.benchGramSaveDeletedMessages.get())
+        );
+        items.add(UItem.asShadow(getString(R.string.BenchGramSaveDeletedMessagesInfo)));
     }
 
     @Override
     protected void onClick(UItem item, View view, int position, float x, float y) {
         if (item.id == ID_GHOST_STORIES) {
             SharedSettings.benchGramGhostStories.toggle();
+            listView.adapter.update(true);
+        } else if (item.id == ID_SAVE_DELETED_MESSAGES) {
+            SharedSettings.benchGramSaveDeletedMessages.toggle();
             listView.adapter.update(true);
         }
     }

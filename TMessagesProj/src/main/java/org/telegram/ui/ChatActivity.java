@@ -2904,6 +2904,7 @@ public class ChatActivity extends BaseFragment implements
             .add(NotificationCenter.didLoadSendAsPeers)
             .add(NotificationCenter.closeChatActivity)
             .add(NotificationCenter.messagesDeleted)
+            .add(NotificationCenter.benchGramMessagesDeleted)
             .add(NotificationCenter.historyCleared)
             .add(NotificationCenter.messageReceivedByServer)
             .add(NotificationCenter.messageReceivedByAck)
@@ -23181,6 +23182,8 @@ public class ChatActivity extends BaseFragment implements
             if ((Long) args[1] != getQuickReplyId()) return;
             ArrayList<Integer> markAsDeletedMessages = (ArrayList<Integer>) args[0];
             processDeletedMessages(markAsDeletedMessages, 0, false);
+        } else if (id == NotificationCenter.benchGramMessagesDeleted) {
+            updateVisibleRows();
         } else if (id == NotificationCenter.messageReceivedByServer) {
             Boolean scheduled = (Boolean) args[6];
             if (scheduled != (chatMode == MODE_SCHEDULED)) {
